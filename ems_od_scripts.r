@@ -367,3 +367,23 @@ ems_opi_tab <- narc_tab_a %>%
   left_join(opi_prob_tab_a) %>% 
   left_join(opi_icd_tab_a) %>% 
   left_join(drug_icd_tab_a) 
+
+## mapping
+options(digits = 9)
+
+ems_geo_narcan <- ems_narcan_unnest %>% 
+  filter(opioid_narcan_resp == 1) %>% 
+  select(fact_incident_pk, incident_date, gps_latitude, gps_longitude) %>% 
+  mutate(gps_latitude = as.numeric(gps_latitude),
+         gps_longitude = as.numeric(gps_longitude)) %>% 
+  na.omit() %>% 
+  filter(gps_latitude > 45, gps_latitude < 49,  
+         gps_longitude > -125, gps_longitude < -116)
+
+library(leaflet)
+opi_cluster <- ems_geo_narcan %>% leaflet() %>%
+  addTiles() %>% 
+  addMarkers(
+    lng = ~gps_longitude, lat = ~gps_latitude,
+    clusterOptions = markerClusterOptions()
+  )
