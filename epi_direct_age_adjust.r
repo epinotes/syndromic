@@ -33,21 +33,23 @@ epi_direct_age_adjust <- function(data, agegrp = agegrp11, count = count, popula
   std_pop <- data %>%
     pull(std_pop) %>% unlist
   
-  rate <- data %>% mutate(rate = as.numeric((!!count))/as.numeric((!!population))) %>% pull(rate)
-  stdwt <- std_pop/sum(std_pop)
+  pop_v <- data %>% pull(as.numeric((!!population))) %>% unlist
+  count_v <- data %>% pull(as.numeric((!!count))) %>% unlist
+  
+  rate <- count_v / pop_v
+  stdwt <- std_pop / sum(std_pop)
   dsr <- sum(stdwt * rate)
-  var_k <- data %>% mutate(var_k = as.numeric((!!count))/as.numeric((!!population))^2) %>% pull(var_k)
+  var_k <- count_v / (pop_v)^2
   dsr_var <- sum((stdwt^2) * var_k)
-  pop <- data %>% pull(as.numeric((!!population)))
-  count_s <- data %>% pull(as.numeric((!!count)))
-  wm <- max(stdwt/pop)
+  
+  wm <- max(stdwt/pop_v)
   gamma_lci <- qgamma(alpha/2, shape = (dsr^2)/dsr_var, scale = dsr_var/dsr)
   gamma_uci <- qgamma(1 - alpha/2, 
                       shape = ((dsr + wm)^2)/(dsr_var + wm^2), 
                       scale = (dsr_var + wm^2)/(dsr + wm))
   
   tibble(count = sum(count_s),
-         population = sum(pop),
+         population = sum(pop_v),
          age_adj_rate = round(dsr*s, r),
          lower_age_adj = round(gamma_lci*s, r),
          upper_age_adj = round(gamma_uci*s, r))
