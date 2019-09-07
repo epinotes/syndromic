@@ -5,5 +5,5 @@
 *.Rproj
 *.html
 using_git.Rmd
-
 *.pdf
+divers.R

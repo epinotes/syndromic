@@ -13,7 +13,7 @@ epi_direct_age_adjust <- function(data, agegrp = agegrp11, count = count, popula
   suppressWarnings(suppressMessages(require(tidyr)))
   
   us2000std = tibble(std_pop = c(0.013818,0.055317,0.145565,0.138646, 0.135573,0.162613,0.134834,0.087247,0.066037,0.044842,0.015508),
-                     !!age_name := as.numeric(c(1:11)))
+                     !!age_name := c(1:11))
   
   
   # calculate adjusted rate and confidence interval with gamma distribution
@@ -24,8 +24,8 @@ epi_direct_age_adjust <- function(data, agegrp = agegrp11, count = count, popula
   
   # suppressWarnings(suppressMessages(
   
-  data <- data %>%
-    mutate(!!age_name := as.numeric(!!agegrp)) %>%
+  data <- data %>% 
+    mutate(!!age_name := as.numeric(levels(!!agegrp))[as.integer(!!agegrp)]) %>%
     right_join(us2000std, by = age_name) %>%
     mutate(count_name := replace_na(!!count, 0),
            pop_name :=  replace_na(!!population, 0))
