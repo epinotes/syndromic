@@ -27,8 +27,8 @@ epi_direct_age_adjust <- function(data, agegrp = agegrp11, count = count, popula
   data <- data %>% 
     mutate(!!age_name := as.numeric(as.character(!!agegrp))) %>%
     right_join(us2000std, by = age_name) %>%
-    mutate(count_name := replace_na(!!count, 0),
-           pop_name :=  replace_na(!!population, 0))
+    mutate(count_name := replace_na(list((!!count) = 0)),
+           pop_name :=  replace_na(list((!!population) = 0)))
   
   std_pop <- data %>%
     pull(std_pop) %>% unlist
