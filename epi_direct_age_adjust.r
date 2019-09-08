@@ -48,7 +48,7 @@ epi_direct_age_adjust <- function(data, agegrp = agegrp11, count = count, popula
                       shape = ((dsr + wm)^2)/(dsr_var + wm^2), 
                       scale = (dsr_var + wm^2)/(dsr + wm))
   
-  tibble(count = sum(count_s),
+  tibble(count = sum(count_v),
          population = sum(pop_v),
          age_adj_rate = round(dsr*s, r),
          lower_age_adj = round(gamma_lci*s, r),
