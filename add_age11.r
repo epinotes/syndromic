@@ -20,5 +20,6 @@ add_age11 <- function(data, age){
                                                           `55-64` = "8", 
                                                           `65-74` = "9", 
                                                           `75-84` = "10",
-                                                          `85+` = "11"))
+                                                          `85+` = "11")) %>% 
+    mutate(agegrp11 = as.double(as.character(agegrp11)))
 }
