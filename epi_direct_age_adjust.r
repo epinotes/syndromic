@@ -25,8 +25,9 @@ epi_direct_age_adjust <- function(data, agegrp = agegrp11, count = count, popula
   # suppressWarnings(suppressMessages(
   
   data <- data %>% as.data.frame() %>% 
-    mutate(!!age_name := as.double(as.character(!!agegrp))) %>%
+    mutate(!!age_name := as.character(!!agegrp)) %>%
     right_join(us2000std, by = age_name) %>%
+    mutate(age_name = as.double(age_name)) %>% 
     mutate(count_name := replace_na(!!count, 0),
            pop_name := replace_na(!!population, 0))
   
