@@ -33,8 +33,8 @@ epi_direct_age_adjust <- function(data, agegrp = agegrp11, count = count, popula
   std_pop <- data %>%
     pull(std_pop) %>% unlist
   
-  pop_v <- data %>% pull(as.double((!!population))) %>% unlist
-  count_v <- data %>% pull(as.double((!!count))) %>% unlist
+  pop_v <- data %>% pull(as.double(!!population)) %>% unlist
+  count_v <- data %>% pull(as.double(!!count)) %>% unlist
   
   rate <- count_v / pop_v
   stdwt <- std_pop / sum(std_pop)
