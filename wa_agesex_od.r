@@ -1,5 +1,5 @@
-wa_agesex_od <- function(username = kr_username, password = kr_password, 
-                           site_no = kr_siteno, user_id = kr_userid, 
+wa_agesex_od <- function(username, password, 
+                           site_no, user_id, 
                            start_date, end_date) {
   require(httr, quietly = T)
   require(glue, quietly = T)
