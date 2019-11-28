@@ -2,8 +2,7 @@ add_age_group10 <- function(data, age){
   suppressWarnings(suppressMessages(require(classInt)))
   suppressWarnings(suppressMessages(require(dplyr)))
   suppressWarnings(suppressMessages(require(forcats)))
-  age <- enquo(age)
-  age <- data %>% pull(!!age) %>% unlist()
+  age <- data %>% pull({{age}}) %>% unlist()
   age_max <- ifelse(max(age, na.rm = T) > 84, max(age, na.rm = T), 120)
   agecut10 <- c(0, 10, 14, 24, 34, 44, 54, 64, 74, 84, age_max)
   int10 <- classIntervals(age, n = 10, style = "fixed", 
