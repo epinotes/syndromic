@@ -1,4 +1,4 @@
-get_vaping <- function(username, password, site_no, user_id, version = 1,start_date, end_date, ...) {
+get_ed_vaping <- function(username, password, site_no, user_id, version = 1,start_date, end_date, ...) {
   
   # optional quoted selected fields 
   
