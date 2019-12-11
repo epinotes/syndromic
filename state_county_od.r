@@ -1,7 +1,9 @@
-state_county_od <- state_county_od <- function(username, password, site_no, user_id, state = "WA", start_date, end_date) {
+state_county_od <- state_county_od <- function(username, password, site_no, user_id, state, start_date, end_date) {
   
-  # dates arguments in the format "2019-01-31"
+  # dates argument in the format "2019-01-31"
+  # state argument in the format of quoted two character state name example state = "WA
   
+  require(dplyr, quietly = T)
   require(httr, quietly = T)
   require(glue, quietly = T)
   require(purrr, quietly = T)
