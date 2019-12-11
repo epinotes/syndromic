@@ -1,4 +1,4 @@
-state_county_od <- function(username, password, site_no, user_id, state = "WA", start_date, end_date) {
+state_county_od <- state_county_od <- function(username, password, site_no, user_id, state = "WA", start_date, end_date) {
   
   # dates arguments in the format "2019-01-31"
   
@@ -13,31 +13,32 @@ state_county_od <- function(username, password, site_no, user_id, state = "WA", 
   site_no = as.character(site_no)
   
   
-  con <- paste0("&patientLoc=", state, "_")
+  con <- paste0("&patientLoc=", {{state}}, "_")
   
-  state_co <- tidycensus::fips_codes %>% filter(state == state) %>% 
+  state_co <- tidycensus::fips_codes %>% filter(state == {{state}}) %>% 
     pull(county) %>% unlist %>% tolower %>% 
     gsub(" county", "", .) %>% 
     gsub("\\s", "%20", .) %>% 
     paste(collapse = con) %>% 
     paste0(con,.)
   
+  
   url <- glue::glue("https://essence.syndromicsurveillance.org/nssp_essence/api/tableBuilder/csv?endDate={end_date}&ccddCategory=cdc%20stimulants%20v3&ccddCategory=cdc%20opioid%20overdose%20v2&ccddCategory=cdc%20heroin%20overdose%20v4&ccddCategory=cdc%20all%20drug%20v1&percentParam=ccddCategory&geographySystem=hospital&datasource=va_hosp&detector=nodetectordetector&startDate={start_date}&timeResolution=monthly{state_co}&hasBeenE=1&medicalGroupingSystem=essencesyndromes&userId={user_id}&site={site_no}&hospFacilityType=emergency%20care&aqtTarget=TableBuilder&rowFields=timeResolution&rowFields=site&rowFields=patientLoc&columnField=ccddCategory")
   
   api_response <- GET(url, authenticate(user = username, password = password))
   
-  co_od <- content(api_response, type = "text/csv") 
+  co_od <- content(api_response, type = "text/csv")
   
-  co_od <- co_od %>% 
+  co_od <- co_od %>%
     clean_names() %>%
     select(site,
            patient_loc,
-           year_month = time_resolution, 
+           year_month = time_resolution,
            cdc_all_drug_v1_numerator=cdc_all_drug_v1_data_count,
            cdc_opioid_overdose_v2_numerator=cdc_opioid_overdose_v2_data_count,
            cdc_heroin_overdose_v4_numerator=cdc_heroin_overdose_v4_data_count,
            cdc_stimulants_v3_numerator=cdc_stimulants_v3_data_count,
-           denominator=cdc_opioid_overdose_v2_all_count) %>% 
+           denominator=cdc_opioid_overdose_v2_all_count) %>%
     separate(year_month, c("Year", "Month"))
   
   co_od
