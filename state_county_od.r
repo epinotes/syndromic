@@ -1,3 +1,17 @@
+#' Title
+#'
+#' @param username 
+#' @param password 
+#' @param site_no 
+#' @param user_id 
+#' @param state 
+#' @param start_date 
+#' @param end_date 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 state_county_od <- state_county_od <- function(username, password, site_no, user_id, state, start_date, end_date) {
   
   # dates argument in the format "2019-01-31"

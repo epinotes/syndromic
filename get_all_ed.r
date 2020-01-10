@@ -1,3 +1,17 @@
+#' Title
+#'
+#' @param username 
+#' @param password 
+#' @param site_no 
+#' @param user_id 
+#' @param start_date 
+#' @param end_date 
+#' @param ... 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 get_all_ed <- function(username, password,
                        site_no, user_id,
                        start_date, end_date, ...) {

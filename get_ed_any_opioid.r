@@ -1,3 +1,18 @@
+#' Title
+#'
+#' @param username 
+#' @param password 
+#' @param site_no 
+#' @param user_id 
+#' @param version 
+#' @param start_date 
+#' @param end_date 
+#' @param ... 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 get_ed_any_opioid <- function(username, password, site_no, user_id, version = 2,start_date, end_date, ...) {
   
   # optional quoted selected fields 
