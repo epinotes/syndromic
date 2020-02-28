@@ -4,13 +4,22 @@ wa_agesex_od_all <- function(username, password,
   require(httr, quietly = T)
   require(glue, quietly = T)
   require(purrr, quietly = T)
-  require(janitor, quietly = T)
   
   start_date = format(as.Date(start_date) , "%d%b%Y")
   end_date = format(as.Date(end_date) , "%d%b%Y")
   site_no = as.character(site_no)
   
-  
+  clean_var_names <- purrr:compose(
+    # remove extreme "_"
+    function(x) gsub("^_|_$", "", x, perl = T), 
+    # remove repeat "_"
+    function(x) gsub("(_)(?=_*\\1)", "", x, perl = T), 
+    # not [A-Za-z0-9_] and replace with "_"
+    function(x) gsub("\\W", "_", x), 
+    # parenthesis/bracket and its contents
+    function(x) gsub("\\(.+\\)", "", x),
+    function(x) gsub("\\[.+\\]", "", x),
+    tolower)
   
   url <- glue::glue("https://essence.syndromicsurveillance.org/nssp_essence/api/tableBuilder/csv?endDate={end_date}&ccddCategory=cdc%20stimulants%20v3&ccddCategory=cdc%20opioid%20overdose%20v2&ccddCategory=cdc%20heroin%20overdose%20v4&ccddCategory=cdc%20all%20drug%20v1&percentParam=ccddCategory&geographySystem=hospital&datasource=va_hosp&detector=nodetectordetector&startDate={start_date}&timeResolution=monthly&hasBeenE=1&medicalGroupingSystem=essencesyndromes&userId={user_id}&site={site_no}&hospFacilityType=emergency%20care&aqtTarget=TableBuilder&rowFields=timeResolution&rowFields=site&rowFields=patientLoc&rowFields=sex&rowFields=ageNCHS&columnField=ccddCategory")
   
@@ -18,7 +27,7 @@ wa_agesex_od_all <- function(username, password,
   
   
   result_site_ageSex <- content(api_response, type = "text/csv") %>%
-    clean_names() %>%
+    set_names(clean_var_names) %>%
     select(site,
            year_month = time_resolution,
            sex,
