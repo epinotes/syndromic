@@ -38,7 +38,7 @@ state_county_od <- state_county_od <- function(username, password, site_no, user
     paste(collapse = con) %>% 
     paste0(con,.)
   
-  clean_var_names <- purrr:compose(
+  clean_var_names <- purrr::compose(
     # remove extreme "_"
     function(x) gsub("^_|_$", "", x, perl = T), 
     # remove repeat "_"
