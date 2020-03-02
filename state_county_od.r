@@ -60,7 +60,7 @@ state_county_od <- state_county_od <- function(username, password, site_no, user
   co_od <- co_od %>%
     set_names(clean_var_names) %>%
     select(site,
-           patient_loc,
+           patient_loc = patientloc,
            year_month = timeresolution,
            cdc_all_drug_v1_numerator=cdc_all_drug_v1_data_count,
            cdc_opioid_overdose_v2_numerator=cdc_opioid_overdose_v2_data_count,
