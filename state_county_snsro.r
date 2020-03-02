@@ -39,7 +39,7 @@ state_county_snsro <- function(username, password, site_no, user_id, state, star
     paste(collapse = con) %>% 
     paste0(con,.)
   
-  clean_var_names <- purrr:compose(
+  clean_var_names <- purrr::compose(
     # remove extreme "_"
     function(x) gsub("^_|_$", "", x, perl = T), 
     # remove repeat "_"
@@ -61,8 +61,8 @@ state_county_snsro <- function(username, password, site_no, user_id, state, star
   co_snsro <- co_snsro %>%
     set_names(clean_var_names) %>%
     select(site,
-           patient_loc,
-           year_month = time_resolution,
+           patient_loc = patientloc,
+           year_month = timeresolution,
            cdc_suicidal_ideation_v1_numerator=cdc_suicidal_ideation_v1_data_count,
            cdc_suicide_attempt_v1_numerator=cdc_suicide_attempt_v1_data_count,
            cdc_suicide_related_v1_numerator=sdc_suicide_related_v1_data_count,
