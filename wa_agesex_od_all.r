@@ -9,7 +9,7 @@ wa_agesex_od_all <- function(username, password,
   end_date = format(as.Date(end_date) , "%d%b%Y")
   site_no = as.character(site_no)
   
-  clean_var_names <- purrr:compose(
+  clean_var_names <- purrr::compose(
     # remove extreme "_"
     function(x) gsub("^_|_$", "", x, perl = T), 
     # remove repeat "_"
