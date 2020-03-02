@@ -29,7 +29,7 @@ wa_agesex_od_all <- function(username, password,
   result_site_ageSex <- content(api_response, type = "text/csv") %>%
     set_names(clean_var_names) %>%
     select(site,
-           year_month = time_resolution,
+           year_month = timeresolution,
            sex,
            age_nchs,
            cdc_all_drug_v1_numerator=cdc_all_drug_v1_data_count,
