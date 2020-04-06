@@ -21,28 +21,28 @@ wa_agesex_snsro <- function(username, password,
     function(x) gsub("\\[.+\\]", "", x),
     tolower)
   
-  url <- glue::glue("https://essence.syndromicsurveillance.org/nssp_essence/api/tableBuilder/csv?endDate={end_date}&ccddCategory=cdc%20suicidal%20ideation%20v1&ccddCategory=cdc%20suicide%20attempt%20v1&ccddCategory=sdc%20suicide%20related%20v1&percentParam=ccddCategory&geographySystem=hospital&datasource=va_hosp&detector=nodetectordetector&startDate={start_date}&timeResolution=monthly&hasBeenE=1&medicalGroupingSystem=essencesyndromes&userId={user_id}&site={site_no}&hospFacilityType=emergency%20care&aqtTarget=TableBuilder&rowFields=timeResolution&rowFields=site&rowFields=patientLoc&rowFields=sex&rowFields=ageNCHS&columnField=ccddCategory")
+  url <- glue::glue("https://essence.syndromicsurveillance.org/nssp_essence/api/tableBuilder/csv?endDate={end_date}&ccddCategory=cdc%20suicidal%20ideation%20v1&ccddCategory=cdc%20suicide%20attempt%20v1&ccddCategory=sdc%20suicide%20related%20v1&percentParam=ccddCategory&geographySystem=hospital&datasource=va_hosp&detector=nodetectordetector&startDate={start_date}&timeResolution=monthly&hasBeenE=1&medicalGroupingSystem=essencesyndromes&userId={user_id}&site={site_no}&hospFacilityType=emergency%20care&aqtTarget=TableBuilder&rowFields=timeResolution&rowFields=site&rowFields=patientLoc&rowFields=sex&rowFields=ageTenYear&columnField=ccddCategory")
   
   api_response <- GET(url, authenticate(user = username, password = password))
   
   
   result_site_ageSex <- content(api_response, type = "text/csv") %>%
-    set_names(clean_var_names) %>%
+    set_names(clean_var_names) %>% 
     select(site,
            year_month = timeresolution,
            sex,
-           age_nchs = agenchs,
+           age_ten_year = agetenyear,
            cdc_suicidal_ideation_v1_numerator=cdc_suicidal_ideation_v1_data_count,
            cdc_suicide_attempt_v1_numerator=cdc_suicide_attempt_v1_data_count,
            cdc_suicide_related_v1_numerator=sdc_suicide_related_v1_data_count,
            denominator=cdc_suicidal_ideation_v1_all_count)
   
   resultM_F <- result_site_ageSex %>%
-    filter(sex %in% c("Male", "Female")) 
+    filter(sex %in% c("Male", "Female"))
   
   resultmissing <- result_site_ageSex %>%
     filter(sex %in% c("Not Reported", "Unknown")) %>%
-    group_by(site, year_month, age_nchs) %>%
+    group_by(site, year_month, age_ten_year) %>%
     summarise_at(c("cdc_suicidal_ideation_v1_numerator",
                    "cdc_suicide_attempt_v1_numerator",
                    "cdc_suicide_related_v1_numerator",
@@ -52,9 +52,9 @@ wa_agesex_snsro <- function(username, password,
   result_site_ageSex <- bind_rows(resultM_F, resultmissing)
   
   result_site_ageSex %>%
-    separate(year_month, c("Year", "Month")) %>% 
-    group_by(site,  Year,  Month, sex,   age_nchs) %>% 
-    summarise_at(vars(cdc_suicidal_ideation_v1_numerator, cdc_suicide_attempt_v1_numerator, cdc_suicide_related_v1_numerator, denominator), sum) %>% 
+    separate(year_month, c("Year", "Month")) %>%
+    group_by(site,  Year,  Month, sex,   age_ten_year) %>%
+    summarise_at(vars(cdc_suicidal_ideation_v1_numerator, cdc_suicide_attempt_v1_numerator, cdc_suicide_related_v1_numerator, denominator), sum) %>%
     ungroup
   
 }
