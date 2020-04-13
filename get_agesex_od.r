@@ -1,7 +1,7 @@
-get_agesex_sro <- function(username, password, 
+get_agesex_od <- function(username, password, 
                            site_no, user_id, 
                            start_date, end_date, timeresolution = "monthly", 
-                           agegroup = "ageTenYear") { #"ageNCHS"
+                           agegroup = "ageNCHS") { # "ageTenYear"
   requireNamespace("httr", quietly = T)
   requireNamespace("glue", quietly = T)
   requireNamespace("purrr", quietly = T)
@@ -25,7 +25,7 @@ get_agesex_sro <- function(username, password,
     function(x) gsub("\\[.+\\]", "", x),
     tolower)
   
-  url <- glue::glue("https://essence.syndromicsurveillance.org/nssp_essence/api/tableBuilder/csv?endDate={end_date}&ccddCategory=cdc%20suicidal%20ideation%20v1&ccddCategory=cdc%20suicide%20attempt%20v1&ccddCategory=sdc%20suicide%20related%20v1&percentParam=ccddCategory&geographySystem=hospital&datasource=va_hosp&detector=nodetectordetector&startDate={start_date}&timeResolution={timeresolution}&hasBeenE=1&medicalGroupingSystem=essencesyndromes&userId={user_id}&site={site_no}&hospFacilityType=emergency%20care&aqtTarget=TableBuilder&rowFields=timeResolution&rowFields=site&rowFields=patientLoc&rowFields=sex&rowFields={agegroup}&columnField=ccddCategory")
+  url <- glue::glue("https://essence.syndromicsurveillance.org/nssp_essence/api/tableBuilder/csv?endDate={end_date}&ccddCategory=cdc%20stimulants%20v3&ccddCategory=cdc%20opioid%20overdose%20v2&ccddCategory=cdc%20heroin%20overdose%20v4&ccddCategory=cdc%20all%20drug%20v1&percentParam=ccddCategory&geographySystem=hospital&datasource=va_hosp&detector=nodetectordetector&startDate={start_date}&timeResolution={timeresolution}&hasBeenE=1&medicalGroupingSystem=essencesyndromes&userId={user_id}&site={site_no}&hospFacilityType=emergency%20care&aqtTarget=TableBuilder&rowFields=timeResolution&rowFields=site&rowFields=patientLoc&rowFields=sex&rowFields={agegroup}&columnField=ccddCategory")
   
   api_response <- GET(url, authenticate(user = username, password = password))
   
@@ -38,10 +38,11 @@ get_agesex_sro <- function(username, password,
            timeresolution,
            sex,
            age_group,
-           cdc_suicidal_ideation_v1_numerator=cdc_suicidal_ideation_v1_data_count,
-           cdc_suicide_attempt_v1_numerator=cdc_suicide_attempt_v1_data_count,
-           cdc_suicide_related_v1_numerator=sdc_suicide_related_v1_data_count,
-           denominator=cdc_suicidal_ideation_v1_all_count)
+           cdc_all_drug_v1_numerator=cdc_all_drug_v1_data_count,
+           cdc_opioid_overdose_v2_numerator=cdc_opioid_overdose_v2_data_count,
+           cdc_heroin_overdose_v4_numerator=cdc_heroin_overdose_v4_data_count,
+           cdc_stimulants_v3_numerator=cdc_stimulants_v3_data_count,
+           denominator=cdc_opioid_overdose_v2_all_count)
   
   resultM_F <- result_site_ageSex %>%
     filter(sex %in% c("Male", "Female"))
@@ -49,9 +50,10 @@ get_agesex_sro <- function(username, password,
   resultmissing <- result_site_ageSex %>%
     filter(sex %in% c("Not Reported", "Unknown")) %>%
     group_by(site, timeresolution, age_group) %>%
-    summarise_at(c("cdc_suicidal_ideation_v1_numerator",
-                   "cdc_suicide_attempt_v1_numerator",
-                   "cdc_suicide_related_v1_numerator",
+    summarise_at(c("cdc_all_drug_v1_numerator",
+                   "cdc_opioid_overdose_v2_numerator",
+                   "cdc_heroin_overdose_v4_numerator",
+                   "cdc_stimulants_v3_numerator",
                    "denominator"), sum) %>%
     mutate(sex = "Missing")
   
@@ -59,8 +61,7 @@ get_agesex_sro <- function(username, password,
   
   result_site_ageSex %>%
     group_by(site,  timeresolution, sex,   age_group) %>%
-    summarise_at(vars(cdc_suicidal_ideation_v1_numerator, cdc_suicide_attempt_v1_numerator, cdc_suicide_related_v1_numerator, denominator), sum) %>%
+    summarise_at(vars(cdc_all_drug_v1_numerator, cdc_opioid_overdose_v2_numerator, cdc_heroin_overdose_v4_numerator, cdc_stimulants_v3_numerator, denominator), sum) %>%
     ungroup %>%
     rename({{timeresolution}} := timeresolution)
-  
-}
+ }
