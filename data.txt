@@ -1,0 +1,6 @@
+- path: tidycensus-fips-codes
+  name: tidycensus-fips-codes
+  rows: 3237
+  cols: 5
+  description: US FIPS codes from the R package tidycensus
+  type: table
