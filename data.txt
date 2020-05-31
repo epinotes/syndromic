@@ -4,3 +4,9 @@
   cols: 5
   description: US FIPS codes from the R package tidycensus
   type: table
+- path: us-fips-codes
+  name: us-fips-codes
+  rows: 3237
+  cols: 5
+  description: US FIPS codes from the R package tidycensus
+  type: table
