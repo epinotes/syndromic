@@ -50,23 +50,40 @@ state_county_od <- state_county_od <- function(username, password, site_no, user
     function(x) gsub("\\[.+\\]", "", x),
     tolower)
   
+  url <- glue::glue("https://essence.syndromicsurveillance.org/nssp_essence/api/tableBuilder/csv?endDate={end_date}&percentParam=noPercent&datasource=va_hosp&startDate={start_date}&medicalGroupingSystem=essencesyndromes&userId={user_id}&site={site_no}&hospFacilityType=emergency%20care&aqtTarget=TableBuilder&ccddCategory=cdc%20stimulants%20v3&ccddCategory=cdc%20opioid%20overdose%20v3&ccddCategory=cdc%20heroin%20overdose%20v4&ccddCategory=cdc%20all%20drug%20v2&geographySystem=hospital&detector=nodetectordetector&timeResolution=monthly{state_co}&rowFields=site&rowFields=patientLoc&rowFields=timeResolution&columnField=ccddCategory")
   
-  url <- glue::glue("https://essence.syndromicsurveillance.org/nssp_essence/api/tableBuilder/csv?endDate={end_date}&ccddCategory=cdc%20stimulants%20v3&ccddCategory=cdc%20opioid%20overdose%20v2&ccddCategory=cdc%20heroin%20overdose%20v4&ccddCategory=cdc%20all%20drug%20v1&percentParam=ccddCategory&geographySystem=hospital&datasource=va_hosp&detector=nodetectordetector&startDate={start_date}&timeResolution=monthly{state_co}&hasBeenE=1&medicalGroupingSystem=essencesyndromes&userId={user_id}&site={site_no}&hospFacilityType=emergency%20care&aqtTarget=TableBuilder&rowFields=timeResolution&rowFields=site&rowFields=patientLoc&columnField=ccddCategory")
+  url_co <- glue::glue("https://essence.syndromicsurveillance.org/nssp_essence/api/tableBuilder/csv?endDate={end_date}&percentParam=noPercent&datasource=va_hosp&startDate={start_date}&medicalGroupingSystem=essencesyndromes&userId={user_id}&site={site_no}&hospFacilityType=emergency%20care&aqtTarget=TableBuilder&geographySystem=hospital&detector=nodetectordetector&timeResolution=monthly{state_co}&hasBeenE=1&rowFields=site&rowFields=patientLoc&columnField=timeResolution")
+  
+ 
   
   api_response <- GET(url, authenticate(user = username, password = password))
   
-  co_od <- content(api_response, type = "text/csv")
+  co_od <- content(api_response, type = "text/csv") %>% 
+    set_names(clean_var_names) 
   
-  co_od <- co_od %>%
+  api_co_response <- httr::GET(url_co, httr::authenticate(user = username, password = password))
+  
+  result_site_co_total <- content(api_co_response, type = "text/csv") %>%
     set_names(clean_var_names) %>%
+    pivot_longer(cols = -c(site, patientloc),
+                 names_to = "timeresolution",
+                 values_to = "denominator") %>% 
+    mutate(timeresolution = gsub("_", "-", timeresolution))
+  
+  co_od  <- co_od  %>% 
+    left_join(result_site_co_total,
+              by = c("site" = "site", "patientloc" = "patientloc", "timeresolution" = "timeresolution"))
+  
+  
+  co_od <- co_od %>% 
     select(site,
            patient_loc = patientloc,
-           year_month = timeresolution,
-           cdc_all_drug_v1_numerator=cdc_all_drug_v1_data_count,
-           cdc_opioid_overdose_v2_numerator=cdc_opioid_overdose_v2_data_count,
-           cdc_heroin_overdose_v4_numerator=cdc_heroin_overdose_v4_data_count,
-           cdc_stimulants_v3_numerator=cdc_stimulants_v3_data_count,
-           denominator=cdc_opioid_overdose_v2_all_count) %>%
+           year_month = timeresolution, 
+           cdc_all_drug_v2_numerator=cdc_all_drug_v2,
+           cdc_opioid_overdose_v3_numerator=cdc_opioid_overdose_v3,
+           cdc_heroin_overdose_v4_numerator=cdc_heroin_overdose_v4,
+           cdc_stimulants_v3_numerator=cdc_stimulants_v3,
+           denominator) %>% 
     separate(year_month, c("Year", "Month"))
   
   co_od
