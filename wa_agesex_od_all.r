@@ -1,9 +1,12 @@
 wa_agesex_od_all <- function(username, password, 
                          site_no, user_id, 
-                         start_date, end_date) {
-  require(httr, quietly = T)
+                         start_date, end_date,
+                            site) {
+ require(httr, quietly = T)
   require(glue, quietly = T)
   require(purrr, quietly = T)
+  require(dplyr, quietly = T)
+  require(tidyr, quietly = T)
   
   start_date = format(as.Date(start_date) , "%d%b%Y")
   end_date = format(as.Date(end_date) , "%d%b%Y")
@@ -21,22 +24,42 @@ wa_agesex_od_all <- function(username, password,
     function(x) gsub("\\[.+\\]", "", x),
     tolower)
   
-  url <- glue::glue("https://essence.syndromicsurveillance.org/nssp_essence/api/tableBuilder/csv?endDate={end_date}&ccddCategory=cdc%20stimulants%20v3&ccddCategory=cdc%20opioid%20overdose%20v3&ccddCategory=cdc%20heroin%20overdose%20v4&ccddCategory=cdc%20all%20drug%20v2&percentParam=ccddCategory&geographySystem=hospital&datasource=va_hosp&detector=nodetectordetector&startDate={start_date}&timeResolution=monthly&hasBeenE=1&medicalGroupingSystem=essencesyndromes&userId={user_id}&site={site_no}&hospFacilityType=emergency%20care&aqtTarget=TableBuilder&rowFields=timeResolution&rowFields=site&rowFields=patientLoc&rowFields=sex&rowFields=ageNCHS&columnField=ccddCategory")
+
+  url <- glue::glue("https://essence.syndromicsurveillance.org/nssp_essence/api/tableBuilder/csv?endDate={end_date}&percentParam=noPercent&datasource=va_hosp&startDate={start_date}&medicalGroupingSystem=essencesyndromes&userId={user_id}&site={site_no}&hospFacilityType=emergency%20care&aqtTarget=TableBuilder&ccddCategory=cdc%20stimulants%20v3&ccddCategory=cdc%20opioid%20overdose%20v3&ccddCategory=cdc%20heroin%20overdose%20v4&ccddCategory=cdc%20all%20drug%20v2&geographySystem=hospital&detector=nodetectordetector&timeResolution=monthly&hasBeenE=1&rowFields=sex&rowFields=ageNCHS&rowFields=timeResolution&columnField=ccddCategory")
   
-  api_response <- GET(url, authenticate(user = username, password = password))
+  url2 <- glue::glue("https://essence.syndromicsurveillance.org/nssp_essence/api/tableBuilder/csv?endDate={end_date}&percentParam=noPercent&datasource=va_hosp&startDate={start_date}&medicalGroupingSystem=essencesyndromes&userId={user_id}&site={site_no}&hospFacilityType=emergency%20care&aqtTarget=TableBuilder&geographySystem=hospital&detector=nodetectordetector&timeResolution=monthly&hasBeenE=1&rowFields=sex&rowFields=ageNCHS&columnField=timeResolution")
   
-  
+  api_response <- httr::GET(url, httr::authenticate(user = username, password = password))
+
   result_site_ageSex <- content(api_response, type = "text/csv") %>%
+    set_names(clean_var_names)
+
+ 
+  api_response2 <- httr::GET(url2, httr::authenticate(user = username, password = password))
+  
+  result_site_total <- content(api_response2, type = "text/csv") %>%
     set_names(clean_var_names) %>%
-    select(site,
-           year_month = timeresolution,
-           sex,
-           age_nchs = agenchs,
-           cdc_all_drug_v2_numerator=cdc_all_drug_v2_data_count,
-           cdc_opioid_overdose_v3_numerator=cdc_opioid_overdose_v3_data_count,
-           cdc_heroin_overdose_v4_numerator=cdc_heroin_overdose_v4_data_count,
-           cdc_stimulants_v3_numerator=cdc_stimulants_v3_data_count,
-           denominator=cdc_opioid_overdose_v3_all_count)
+    pivot_longer(cols = -c(sex, agenchs),
+                 names_to = "timeresolution",
+                 values_to = "denominator") %>% 
+    mutate(timeresolution = gsub("_", "-", timeresolution))
+  
+  result_site_ageSex <- result_site_ageSex %>% 
+    left_join(result_site_total,
+              by = c("sex" = "sex", "agenchs" = "agenchs", "timeresolution" = "timeresolution"))
+  
+  result_site_ageSex <- result_site_ageSex %>%
+    mutate(site = site) %>% 
+    select(
+      site, 
+      year_month = timeresolution,
+      sex,
+      age_nchs = agenchs,
+      cdc_all_drug_v2_numerator=cdc_all_drug_v2,
+      cdc_opioid_overdose_v3_numerator=cdc_opioid_overdose_v3,
+      cdc_heroin_overdose_v4_numerator=cdc_heroin_overdose_v4,
+      cdc_stimulants_v3_numerator=cdc_stimulants_v3,
+      denominator)  
   
   resultM_F <- result_site_ageSex %>%
     filter(sex %in% c("Male", "Female")) 
@@ -56,8 +79,6 @@ wa_agesex_od_all <- function(username, password,
   result_site_ageSex %>%
     separate(year_month, c("Year", "Month")) %>% 
     group_by(site,  Year,  Month, sex,   age_nchs) %>% 
-    summarise_at(vars(cdc_all_drug_v2_numerator, cdc_opioid_overdose_v3_numerator, cdc_heroin_overdose_v4_numerator, cdc_stimulants_v3_numerator, denominator), sum) %>% 
-    ungroup
-  
+    summarise(across(c(cdc_all_drug_v2_numerator, cdc_opioid_overdose_v3_numerator, cdc_heroin_overdose_v4_numerator, cdc_stimulants_v3_numerator, denominator), sum), .groups = "drop") 
 }
 
