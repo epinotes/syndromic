@@ -1,7 +1,6 @@
 wa_agesex_od_all <- function(username, password, 
                          site_no, user_id, 
-                         start_date, end_date,
-                            site) {
+                         start_date, end_date) {
  require(httr, quietly = T)
   require(glue, quietly = T)
   require(purrr, quietly = T)
@@ -25,7 +24,7 @@ wa_agesex_od_all <- function(username, password,
     tolower)
   
 
-  url <- glue::glue("https://essence.syndromicsurveillance.org/nssp_essence/api/tableBuilder/csv?endDate={end_date}&percentParam=noPercent&datasource=va_hosp&startDate={start_date}&medicalGroupingSystem=essencesyndromes&userId={user_id}&site={site_no}&hospFacilityType=emergency%20care&aqtTarget=TableBuilder&ccddCategory=cdc%20stimulants%20v3&ccddCategory=cdc%20opioid%20overdose%20v3&ccddCategory=cdc%20heroin%20overdose%20v4&ccddCategory=cdc%20all%20drug%20v2&geographySystem=hospital&detector=nodetectordetector&timeResolution=monthly&hasBeenE=1&rowFields=sex&rowFields=ageNCHS&rowFields=timeResolution&columnField=ccddCategory")
+  url <- glue::glue("https://essence.syndromicsurveillance.org/nssp_essence/api/tableBuilder/csv?endDate={end_date}&percentParam=noPercent&datasource=va_hosp&startDate={start_date}&medicalGroupingSystem=essencesyndromes&userId={user_id}&site={site_no}&hospFacilityType=emergency%20care&aqtTarget=TableBuilder&ccddCategory=cdc%20stimulants%20v3&ccddCategory=cdc%20opioid%20overdose%20v3&ccddCategory=cdc%20heroin%20overdose%20v4&ccddCategory=cdc%20all%20drug%20v2&geographySystem=hospital&detector=nodetectordetector&timeResolution=monthly&hasBeenE=1&rowFields=site&rowFields=sex&rowFields=ageNCHS&rowFields=timeResolution&columnField=ccddCategory")
   
   url2 <- glue::glue("https://essence.syndromicsurveillance.org/nssp_essence/api/tableBuilder/csv?endDate={end_date}&percentParam=noPercent&datasource=va_hosp&startDate={start_date}&medicalGroupingSystem=essencesyndromes&userId={user_id}&site={site_no}&hospFacilityType=emergency%20care&aqtTarget=TableBuilder&geographySystem=hospital&detector=nodetectordetector&timeResolution=monthly&hasBeenE=1&rowFields=sex&rowFields=ageNCHS&columnField=timeResolution")
   
@@ -49,7 +48,6 @@ wa_agesex_od_all <- function(username, password,
               by = c("sex" = "sex", "agenchs" = "agenchs", "timeresolution" = "timeresolution"))
   
   result_site_ageSex <- result_site_ageSex %>%
-    mutate(site = site) %>% 
     select(
       site, 
       year_month = timeresolution,
