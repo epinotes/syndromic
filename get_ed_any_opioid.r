@@ -13,7 +13,7 @@
 #' @export
 #'
 #' @examples
-get_ed_any_opioid <- function(username, password, site_no, user_id, version = 2,start_date, end_date, ...) {
+get_ed_any_opioid <- function(username, password, site_no, user_id, version = 3,start_date, end_date, ...) {
   
   # optional quoted selected fields 
   
